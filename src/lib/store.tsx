@@ -107,6 +107,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Live Sync from Supabase if configured
+    // Live Sync from Supabase if configured
     if (isSupabaseConfigured() && supabase) {
       supabase
         .from('products')
@@ -152,6 +153,94 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
               }))
             }));
             setProducts(mapped);
+          }
+        });
+
+      supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items (*)
+        `)
+        .order('created_at', { ascending: false })
+        .then(({ data, error }) => {
+          if (!error && data && data.length > 0) {
+            const mappedOrders: Order[] = data.map((o: any) => ({
+              id: o.id,
+              orderNumber: o.order_number,
+              createdAt: o.created_at,
+              customer: {
+                customerType: o.customer_type,
+                firstName: o.first_name,
+                lastName: o.last_name,
+                companyName: o.company_name,
+                vatNumber: o.vat_number,
+                fiscalCode: o.fiscal_code,
+                sdiCode: o.sdi_code,
+                pec: o.pec,
+                email: o.email,
+                phone: o.phone,
+                address: o.address,
+                city: o.city,
+                postalCode: o.postal_code,
+                province: o.province,
+                country: o.country,
+                notes: o.customer_notes
+              },
+              items: (o.order_items || []).map((it: any) => ({
+                product: {
+                  id: it.product_id,
+                  sku: it.product_sku || '',
+                  oemCode: it.product_oem || '',
+                  name: it.product_name || '',
+                  slug: '',
+                  brand: '',
+                  category: '',
+                  condition: 'Nuovo Originale',
+                  priceNet: parseFloat(it.unit_price_net || 0),
+                  priceGross: parseFloat(it.unit_price_gross || 0),
+                  vatRate: 22,
+                  stock: 99,
+                  minStock: 2,
+                  location: '',
+                  shippingCost: 0,
+                  weightKg: 1,
+                  featured: false,
+                  rating: 5,
+                  reviewsCount: 0,
+                  images: [],
+                  description: '',
+                  features: [],
+                  compatibility: []
+                },
+                quantity: it.quantity
+              })),
+              shippingMethod: {
+                id: (o.shipping_method_id as any) || 'express_standard',
+                name: o.shipping_courier || 'Corriere Espresso',
+                courier: o.shipping_courier || 'BRT Express',
+                description: 'Spedizione espressa tracciata in 24/48 ore',
+                price: parseFloat(o.shipping_cost || 0),
+                estimatedDays: '24/48h',
+                freeAbove: 149
+              },
+              paymentMethod: {
+                id: (o.payment_method_id as any) || 'card',
+                name: o.payment_method_id === 'paypal' ? 'PayPal' : o.payment_method_id === 'bank_transfer' ? 'Bonifico Bancario' : 'Carta di Credito / Bancomat',
+                description: 'Pagamento sicuro verificato',
+                extraFee: parseFloat(o.payment_extra_fee || 0)
+              },
+              shippingTotal: parseFloat(o.shipping_cost || 0),
+              paymentExtraFee: parseFloat(o.payment_extra_fee || 0),
+              subtotalNet: parseFloat(o.subtotal_net || 0),
+              vatAmount: parseFloat(o.vat_amount || 0),
+              totalGross: parseFloat(o.total_gross || 0),
+              status: o.status,
+              courierName: o.courier_name,
+              trackingNumber: o.tracking_number,
+              invoiceIssued: o.invoice_issued
+            }));
+            setOrders(mappedOrders);
           }
         });
     }
