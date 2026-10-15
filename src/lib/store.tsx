@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, CartItem, Order, CookiePreferences, VehicleCompatibility } from './types';
 import { INITIAL_PRODUCTS, INITIAL_ORDERS } from './data';
+import { supabase, isSupabaseConfigured } from './supabase';
 
 interface ActiveVehicle {
   make: string;
@@ -72,7 +73,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [isVehicleModalOpen, setIsVehicleModalOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load from LocalStorage on mount
+  // Load from LocalStorage and Supabase on mount
   useEffect(() => {
     try {
       const storedProds = localStorage.getItem(LOCAL_STORAGE_PRODUCTS_KEY);
@@ -103,6 +104,56 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       console.warn('Could not read from local storage', e);
     } finally {
       setIsLoaded(true);
+    }
+
+    // Live Sync from Supabase if configured
+    if (isSupabaseConfigured() && supabase) {
+      supabase
+        .from('products')
+        .select(`
+          id, sku, oem_code, name, slug, brand, category_id, sub_category, condition,
+          price_net, price_gross, vat_rate, stock, min_stock, location, cost_price,
+          weight_kg, shipping_cost, featured, rating, reviews_count, images, description, features,
+          product_compatibilities (make, model, year_start, year_end, engine)
+        `)
+        .then(({ data, error }) => {
+          if (!error && data && data.length > 0) {
+            const mapped: Product[] = data.map((row: any) => ({
+              id: row.id,
+              sku: row.sku,
+              oemCode: row.oem_code,
+              name: row.name,
+              slug: row.slug,
+              brand: row.brand,
+              category: row.category_id,
+              subCategory: row.sub_category,
+              condition: row.condition,
+              priceNet: parseFloat(row.price_net),
+              priceGross: parseFloat(row.price_gross),
+              vatRate: parseFloat(row.vat_rate),
+              stock: row.stock,
+              minStock: row.min_stock,
+              location: row.location,
+              costPrice: row.cost_price ? parseFloat(row.cost_price) : undefined,
+              weightKg: parseFloat(row.weight_kg),
+              shippingCost: parseFloat(row.shipping_cost),
+              featured: row.featured,
+              rating: parseFloat(row.rating),
+              reviewsCount: row.reviews_count,
+              images: row.images || [],
+              description: row.description || '',
+              features: row.features || [],
+              compatibility: (row.product_compatibilities || []).map((c: any) => ({
+                make: c.make,
+                model: c.model,
+                yearStart: c.year_start,
+                yearEnd: c.year_end,
+                engine: c.engine
+              }))
+            }));
+            setProducts(mapped);
+          }
+        });
     }
   }, []);
 
@@ -226,7 +277,50 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       reviewsCount: 0,
       createdAt: new Date().toISOString()
     };
+
     setProducts((prev) => [product, ...prev]);
+
+    // Supabase Sync
+    const sb = supabase;
+    if (sb) {
+      sb.from('products').insert({
+        id: product.id,
+        sku: product.sku,
+        oem_code: product.oemCode,
+        name: product.name,
+        slug: product.slug,
+        brand: product.brand,
+        category_id: product.category,
+        sub_category: product.subCategory,
+        condition: product.condition,
+        price_net: product.priceNet,
+        price_gross: product.priceGross,
+        vat_rate: product.vatRate,
+        stock: product.stock,
+        min_stock: product.minStock,
+        location: product.location,
+        cost_price: product.costPrice,
+        weight_kg: product.weightKg,
+        shipping_cost: product.shippingCost,
+        featured: product.featured,
+        images: product.images,
+        description: product.description,
+        features: product.features
+      }).then(() => {
+        if (product.compatibility.length > 0) {
+          const compRows = product.compatibility.map(c => ({
+            product_id: product.id,
+            make: c.make,
+            model: c.model,
+            year_start: c.yearStart,
+            year_end: c.yearEnd,
+            engine: c.engine
+          }));
+          sb.from('product_compatibilities').insert(compRows).then();
+        }
+      });
+    }
+
     return product;
   };
 
@@ -237,18 +331,26 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateProductStock = (id: string, newStock: number) => {
+    const stockVal = Math.max(0, newStock);
     setProducts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, stock: Math.max(0, newStock) } : p))
+      prev.map((p) => (p.id === id ? { ...p, stock: stockVal } : p))
     );
+
+    if (supabase) {
+      supabase.from('products').update({ stock: stockVal }).eq('id', id).then();
+    }
   };
 
   const deleteProduct = (id: string) => {
     setProducts((prev) => prev.filter((p) => p.id !== id));
+    if (supabase) {
+      supabase.from('products').delete().eq('id', id).then();
+    }
   };
 
   // Order creation & stock reduction
   const createOrder = (orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt'>): Order => {
-    const orderNumber = `ESP-${new Date().getFullYear()}-${String(orders.length + 41).padStart(4, '0')}`;
+    const orderNumber = `ESP-2026-${String(orders.length + 41).padStart(4, '0')}`;
     const newOrder: Order = {
       ...orderData,
       id: `ord-${Date.now()}`,
@@ -270,6 +372,56 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     setOrders((prev) => [newOrder, ...prev]);
     clearCart();
+
+    // Sync Order & Order Items to Supabase
+    const sb = supabase;
+    if (sb) {
+      sb.from('orders').insert({
+        id: newOrder.id,
+        order_number: newOrder.orderNumber,
+        customer_type: newOrder.customer.customerType,
+        first_name: newOrder.customer.firstName,
+        last_name: newOrder.customer.lastName,
+        company_name: newOrder.customer.companyName,
+        vat_number: newOrder.customer.vatNumber,
+        fiscal_code: newOrder.customer.fiscalCode,
+        sdi_code: newOrder.customer.sdiCode,
+        pec: newOrder.customer.pec,
+        email: newOrder.customer.email,
+        phone: newOrder.customer.phone,
+        address: newOrder.customer.address,
+        city: newOrder.customer.city,
+        postal_code: newOrder.customer.postalCode,
+        province: newOrder.customer.province,
+        country: newOrder.customer.country,
+        customer_notes: newOrder.customer.notes,
+        shipping_method_id: newOrder.shippingMethod.id,
+        shipping_courier: newOrder.shippingMethod.courier,
+        shipping_cost: newOrder.shippingTotal,
+        payment_method_id: newOrder.paymentMethod.id,
+        payment_extra_fee: newOrder.paymentExtraFee,
+        subtotal_net: newOrder.subtotalNet,
+        vat_amount: newOrder.vatAmount,
+        total_gross: newOrder.totalGross,
+        status: newOrder.status,
+        invoice_issued: newOrder.invoiceIssued
+      }).then(() => {
+        const orderItemsPayload = newOrder.items.map(i => ({
+          order_id: newOrder.id,
+          product_id: i.product.id,
+          product_name: i.product.name,
+          product_sku: i.product.sku,
+          product_oem: i.product.oemCode,
+          unit_price_net: i.product.priceNet,
+          unit_price_gross: i.product.priceGross,
+          quantity: i.quantity,
+          total_net: parseFloat((i.product.priceNet * i.quantity).toFixed(2)),
+          total_gross: parseFloat((i.product.priceGross * i.quantity).toFixed(2))
+        }));
+        sb.from('order_items').insert(orderItemsPayload).then();
+      });
+    }
+
     return newOrder;
   };
 
@@ -277,6 +429,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setOrders((prev) =>
       prev.map((ord) => (ord.id === orderId ? { ...ord, status } : ord))
     );
+    if (supabase) {
+      supabase.from('orders').update({ status }).eq('id', orderId).then();
+    }
   };
 
   const updateOrderTracking = (orderId: string, courier: string, trackingNumber: string) => {
@@ -287,6 +442,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           : ord
       )
     );
+    if (supabase) {
+      supabase.from('orders').update({ courier_name: courier, tracking_number: trackingNumber, status: 'shipped' }).eq('id', orderId).then();
+    }
   };
 
   const saveCookieConsent = (prefs: CookiePreferences) => {
