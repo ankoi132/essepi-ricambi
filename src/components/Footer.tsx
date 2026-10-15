@@ -171,8 +171,9 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/admin" className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors">
-                  Pannello Gestione (Magazzino / Soci)
+                <Link href="/admin" className="text-slate-500 hover:text-orange-400 font-semibold transition-colors flex items-center gap-1.5">
+                  <Lock className="w-3 h-3 text-orange-400/80" />
+                  <span>Area Riservata Staff (PIN)</span>
                 </Link>
               </li>
             </ul>

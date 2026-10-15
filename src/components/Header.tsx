@@ -199,14 +199,14 @@ export default function Header() {
               )}
             </button>
 
-            {/* Admin Management Dashboard Link */}
+            {/* Always-visible non-intrusive Contacts link */}
             <Link
-              href="/admin"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-700/80 text-xs font-medium text-slate-300 hover:text-white transition-all"
-              title="Pannello Gestione Magazzino & Ordini"
+              href="/contatti"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 hover:text-white transition-all shadow-sm"
+              title="Assistenza e Contatti Essepi Ricambi"
             >
-              <LayoutDashboard className="w-4 h-4 text-cyan-400" />
-              <span>Magazzino</span>
+              <PhoneCall className="w-4 h-4 text-emerald-400" />
+              <span className="hidden xs:inline sm:inline">Contatti</span>
             </Link>
 
             {/* Shopping Cart Button */}
@@ -290,11 +290,11 @@ export default function Header() {
               Catalogo Completo
             </Link>
             <Link 
-              href="/admin" 
+              href="/contatti" 
               onClick={() => setIsMobileMenuOpen(false)}
-              className="p-2.5 rounded bg-slate-900 text-cyan-400 font-bold"
+              className="p-2.5 rounded bg-slate-900 text-emerald-400 font-bold"
             >
-              Gestione Magazzino
+              Contatti & WhatsApp
             </Link>
           </div>
 

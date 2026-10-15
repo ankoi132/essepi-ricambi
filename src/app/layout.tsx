@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import CartDrawer from '@/components/CartDrawer';
 import VehicleSelectorModal from '@/components/VehicleSelectorModal';
 import CookieBanner from '@/components/CookieBanner';
+import FloatingContactWidget from '@/components/FloatingContactWidget';
 
 export const metadata: Metadata = {
   title: 'Essepi Ricambi | Negozio Online Ricambi Auto Originali & Aftermarket',
@@ -54,6 +55,7 @@ export default function RootLayout({
           <CartDrawer />
           <VehicleSelectorModal />
           <CookieBanner />
+          <FloatingContactWidget />
         </StoreProvider>
       </body>
     </html>

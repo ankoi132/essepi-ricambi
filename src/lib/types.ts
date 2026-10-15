@@ -104,11 +104,48 @@ export interface Order {
   shippingTotal: number;
   paymentExtraFee: number;
   totalGross: number; // Totale finale da pagare
-  status: 'pending_payment' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status: 'pending_payment' | 'processing' | 'packed' | 'shipped' | 'delivered' | 'issue' | 'cancelled';
   trackingNumber?: string;
   courierName?: string;
+  trackingUrl?: string;
+  shippingActualCost?: number;
+  weightKgTotal?: number;
+  internalNotes?: string;
   invoiceIssued: boolean;
   invoiceNumber?: string;
+  invoiceDate?: string;
+}
+
+export interface CrmCustomer {
+  id: string;
+  customerType: 'private' | 'business';
+  firstName: string;
+  lastName: string;
+  companyName?: string;
+  vatNumber?: string;
+  fiscalCode: string;
+  sdiCode?: string;
+  pec?: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  province: string;
+  country: string;
+  totalOrders: number;
+  totalSpent: number;
+  lastOrderDate?: string;
+  internalNotes?: string;
+  tags?: string[];
+}
+
+export interface StaffOperator {
+  id: string;
+  name: string;
+  role: 'titolare' | 'socio' | 'magazzino' | 'commercialista';
+  title: string;
+  avatarColor: string;
 }
 
 export interface FilterState {

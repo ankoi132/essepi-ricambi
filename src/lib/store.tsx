@@ -41,7 +41,8 @@ interface StoreContextType {
   orders: Order[];
   createOrder: (orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt'>) => Order;
   updateOrderStatus: (orderId: string, status: Order['status']) => void;
-  updateOrderTracking: (orderId: string, courier: string, trackingNumber: string) => void;
+  updateOrderTracking: (orderId: string, courier: string, trackingNumber: string, trackingUrl?: string) => void;
+  updateOrderDetails: (orderId: string, details: Partial<Order>) => void;
 
   // Legal & Cookies
   cookieConsent: CookiePreferences | null;
@@ -523,16 +524,43 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const updateOrderTracking = (orderId: string, courier: string, trackingNumber: string) => {
+  const getTrackingUrl = (courier: string, trackingNumber: string): string => {
+    const c = courier.toLowerCase();
+    const t = encodeURIComponent(trackingNumber.trim());
+    if (c.includes('brt')) return `https://www.brt.it/it/tracking?trackingCode=${t}`;
+    if (c.includes('gls')) return `https://www.gls-italy.com/it/servizi-per-destinatari/ricerca-spedizioni/?numeroSpedizione=${t}`;
+    if (c.includes('dhl')) return `https://www.dhl.com/it-it/home/tracciamento.html?tracking-id=${t}`;
+    if (c.includes('poste') || c.includes('sda')) return `https://www.poste.it/cerca/index.html#/risultati-spedizioni/${t}`;
+    return `https://www.google.com/search?q=tracking+${encodeURIComponent(courier)}+${t}`;
+  };
+
+  const updateOrderTracking = (orderId: string, courier: string, trackingNumber: string, customTrackingUrl?: string) => {
+    const trackingUrl = customTrackingUrl || getTrackingUrl(courier, trackingNumber);
     setOrders((prev) =>
       prev.map((ord) =>
         ord.id === orderId
-          ? { ...ord, courierName: courier, trackingNumber, status: 'shipped' }
+          ? { ...ord, courierName: courier, trackingNumber, trackingUrl, status: 'shipped' }
           : ord
       )
     );
     if (supabase) {
       supabase.from('orders').update({ courier_name: courier, tracking_number: trackingNumber, status: 'shipped' }).eq('id', orderId).then();
+    }
+  };
+
+  const updateOrderDetails = (orderId: string, details: Partial<Order>) => {
+    setOrders((prev) =>
+      prev.map((ord) => (ord.id === orderId ? { ...ord, ...details } : ord))
+    );
+    if (supabase) {
+      const payload: Record<string, any> = {};
+      if (details.status) payload.status = details.status;
+      if (details.courierName) payload.courier_name = details.courierName;
+      if (details.trackingNumber) payload.tracking_number = details.trackingNumber;
+      if (details.invoiceIssued !== undefined) payload.invoice_issued = details.invoiceIssued;
+      if (Object.keys(payload).length > 0) {
+        supabase.from('orders').update(payload).eq('id', orderId).then();
+      }
     }
   };
 
@@ -570,6 +598,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         createOrder,
         updateOrderStatus,
         updateOrderTracking,
+        updateOrderDetails,
         cookieConsent,
         saveCookieConsent,
         isCartDrawerOpen,
