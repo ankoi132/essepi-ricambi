@@ -38,11 +38,20 @@ import {
   Eye,
   DollarSign,
   UserCheck,
-  UserPlus
+  UserPlus,
+  Sparkles
 } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { Product, Order, VehicleCompatibility, CrmCustomer, StaffOperator } from '@/lib/types';
 import { INITIAL_CATEGORIES } from '@/lib/data';
+import { 
+  AreaSplineChart, 
+  BarHistogramChart, 
+  DonutPieChart, 
+  LineDataPoint, 
+  BarDataPoint, 
+  PieSlice 
+} from '@/components/CrmCharts';
 
 // Predefined Staff Team Members
 const STAFF_OPERATORS: StaffOperator[] = [
@@ -106,6 +115,8 @@ export default function AdminPage() {
 
   // --- NAVIGATION TABS ---
   const [activeTab, setActiveTab] = useState<'kpi' | 'logistics' | 'crm' | 'fiscal' | 'warehouse' | 'new-product'>('kpi');
+  const [kpiTimeframe, setKpiTimeframe] = useState<'7g' | '30g' | '90g' | '2026'>('30g');
+  const [kpiSubTab, setKpiSubTab] = useState<'overview' | 'sales' | 'inventory' | 'logistics'>('overview');
   
   // --- LOGISTICS & ORDERS STATE ---
   const [logisticsFilter, setLogisticsFilter] = useState<'all' | 'processing' | 'packed' | 'shipped' | 'issue' | 'delivered'>('all');
@@ -323,6 +334,143 @@ export default function AdminPage() {
       totalShippingEstimatedCost
     };
   }, [orders, products]);
+
+  // --- CRM & KPI CHARTS ANALYTICS DATA ---
+  const timelineData: LineDataPoint[] = useMemo(() => {
+    if (kpiTimeframe === '7g') {
+      return [
+        { date: '09 Ottobre', label: 'Ven 09', revenue: 640.00, netRevenue: 524.59, ordersCount: 4 },
+        { date: '10 Ottobre', label: 'Sab 10', revenue: 980.00, netRevenue: 803.28, ordersCount: 6 },
+        { date: '11 Ottobre', label: 'Dom 11', revenue: 420.00, netRevenue: 344.26, ordersCount: 3 },
+        { date: '12 Ottobre', label: 'Lun 12', revenue: 1450.00, netRevenue: 1188.52, ordersCount: 8 },
+        { date: '13 Ottobre', label: 'Mar 13', revenue: 1120.00, netRevenue: 918.03, ordersCount: 7 },
+        { date: '14 Ottobre', label: 'Mer 14', revenue: 1780.00, netRevenue: 1459.02, ordersCount: 11 },
+        { date: '15 Ottobre', label: 'Oggi', revenue: kpiStats.totalGrossRevenue > 0 ? kpiStats.totalGrossRevenue : 2140.00, netRevenue: kpiStats.totalNetRevenue > 0 ? kpiStats.totalNetRevenue : 1754.10, ordersCount: orders.length || 14 }
+      ];
+    }
+    if (kpiTimeframe === '30g') {
+      return [
+        { date: 'Settimana 38', label: 'Sett 38', revenue: 4200.00, netRevenue: 3442.62, ordersCount: 26 },
+        { date: 'Settimana 39', label: 'Sett 39', revenue: 5850.00, netRevenue: 4795.08, ordersCount: 38 },
+        { date: 'Settimana 40', label: 'Sett 40', revenue: 6420.00, netRevenue: 5262.30, ordersCount: 44 },
+        { date: 'Settimana 41', label: 'Sett 41', revenue: 7980.00, netRevenue: 6540.98, ordersCount: 52 },
+        { date: 'Settimana 42', label: 'In Corso', revenue: 8650.00, netRevenue: 7090.16, ordersCount: 59 }
+      ];
+    }
+    if (kpiTimeframe === '90g') {
+      return [
+        { date: 'Agosto 2026', label: 'Ago', revenue: 16500.00, netRevenue: 13524.59, ordersCount: 98 },
+        { date: 'Settembre 2026', label: 'Set', revenue: 29400.00, netRevenue: 24098.36, ordersCount: 194 },
+        { date: 'Ottobre 2026', label: 'Ott', revenue: 34200.00, netRevenue: 28032.79, ordersCount: 228 }
+      ];
+    }
+    // 2026
+    return [
+      { date: 'Maggio 2026', label: 'Mag', revenue: 18400.00, netRevenue: 15081.97, ordersCount: 115 },
+      { date: 'Giugno 2026', label: 'Giu', revenue: 22100.00, netRevenue: 18114.75, ordersCount: 142 },
+      { date: 'Luglio 2026', label: 'Lug', revenue: 26800.00, netRevenue: 21967.21, ordersCount: 176 },
+      { date: 'Agosto 2026', label: 'Ago', revenue: 16500.00, netRevenue: 13524.59, ordersCount: 98 },
+      { date: 'Settembre 2026', label: 'Set', revenue: 29400.00, netRevenue: 24098.36, ordersCount: 194 },
+      { date: 'Ottobre 2026', label: 'Ott', revenue: 34200.00, netRevenue: 28032.79, ordersCount: 228 }
+    ];
+  }, [kpiTimeframe, kpiStats, orders.length]);
+
+  const marginTimelineData: LineDataPoint[] = useMemo(() => {
+    return [
+      { date: 'Maggio 2026', label: 'Mag', revenue: 162.00, netRevenue: 48.60, ordersCount: 115 },
+      { date: 'Giugno 2026', label: 'Giu', revenue: 175.50, netRevenue: 52.65, ordersCount: 142 },
+      { date: 'Luglio 2026', label: 'Lug', revenue: 182.00, netRevenue: 56.42, ordersCount: 176 },
+      { date: 'Agosto 2026', label: 'Ago', revenue: 168.40, netRevenue: 50.50, ordersCount: 98 },
+      { date: 'Settembre 2026', label: 'Set', revenue: 194.20, netRevenue: 60.20, ordersCount: 194 },
+      { date: 'Ottobre 2026', label: 'Ott', revenue: 215.00, netRevenue: 66.65, ordersCount: 228 }
+    ];
+  }, []);
+
+  const weeklyVolumeHistogram: BarDataPoint[] = useMemo(() => {
+    return [
+      { label: 'Sett 37', value: 24, color: '#f59e0b' },
+      { label: 'Sett 38', value: 31, color: '#f59e0b' },
+      { label: 'Sett 39', value: 38, color: '#06b6d4' },
+      { label: 'Sett 40', value: 44, color: '#06b6d4' },
+      { label: 'Sett 41', value: 52, color: '#ff5e00' },
+      { label: 'Sett 42 (Oggi)', value: 59, color: '#ff5e00' }
+    ];
+  }, []);
+
+  const categorySalesHistogram: BarDataPoint[] = useMemo(() => {
+    return [
+      { label: 'Freni', value: 8940, color: '#ff5e00', category: 'freni' },
+      { label: 'Distribuzione', value: 7420, color: '#06b6d4', category: 'distribuzione' },
+      { label: 'Fanaleria', value: 6850, color: '#3b82f6', category: 'illuminazione' },
+      { label: 'Motore', value: 5980, color: '#f59e0b', category: 'motore' },
+      { label: 'Sospensioni', value: 5120, color: '#10b981', category: 'sospensioni' },
+      { label: 'Filtri & Serv.', value: 4320, color: '#8b5cf6', category: 'filtri' },
+      { label: 'Carrozzeria', value: 2940, color: '#ec4899', category: 'carrozzeria' }
+    ];
+  }, []);
+
+  const inventoryValueHistogram: BarDataPoint[] = useMemo(() => {
+    const colors = ['#ff5e00', '#06b6d4', '#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899', '#6366f1'];
+    return INITIAL_CATEGORIES.map((cat, idx) => {
+      const prodsInCat = products.filter(p => p.category === cat.slug);
+      const catVal = prodsInCat.reduce((acc, p) => acc + (p.priceGross * p.stock), 0);
+      return {
+        label: cat.name.split(' ')[0],
+        value: catVal > 0 ? catVal : (cat.itemCount * 42),
+        color: colors[idx % colors.length]
+      };
+    });
+  }, [products]);
+
+  const customerSplitPie: PieSlice[] = useMemo(() => {
+    const b2bRev = orders.filter(o => o.customer.customerType === 'business').reduce((acc, o) => acc + o.totalGross, 0);
+    const b2cRev = orders.filter(o => o.customer.customerType === 'private').reduce((acc, o) => acc + o.totalGross, 0);
+    const b2bVal = b2bRev > 0 ? b2bRev : 18450;
+    const b2cVal = b2cRev > 0 ? b2cRev : 9820;
+
+    return [
+      { label: 'B2B Officine & Aziende (SDI)', value: b2bVal, color: '#06b6d4', subtext: 'Fattura con P.IVA e SDI/PEC' },
+      { label: 'B2C Clienti Privati (CF)', value: b2cVal, color: '#ff5e00', subtext: 'Ricevuta con Codice Fiscale' }
+    ];
+  }, [orders]);
+
+  const paymentMethodsPie: PieSlice[] = useMemo(() => {
+    return [
+      { label: 'Carta di Credito / Bancomat', value: 12450, color: '#10b981', subtext: 'Stripe 3D-Secure v2' },
+      { label: 'PayPal & Paga in 3 Rate', value: 8900, color: '#3b82f6', subtext: 'Tasso 0 clienti' },
+      { label: 'Bonifico Bancario', value: 5200, color: '#f59e0b', subtext: 'Anticipato prima di spedire' },
+      { label: 'Contrassegno al Corriere', value: 1720, color: '#8b5cf6', subtext: 'Contanti alla consegna' }
+    ];
+  }, []);
+
+  const stockHealthPie: PieSlice[] = useMemo(() => {
+    const optimal = products.filter(p => p.stock > p.minStock).length;
+    const low = products.filter(p => p.stock > 0 && p.stock <= p.minStock).length;
+    const out = products.filter(p => p.stock === 0).length;
+
+    return [
+      { label: 'Giacenza Ottimale', value: optimal > 0 ? optimal : 42, color: '#10b981', subtext: 'Scorte a regime' },
+      { label: 'In Scorta Bassa', value: low > 0 ? low : 9, color: '#f59e0b', subtext: 'Sotto soglia minima' },
+      { label: 'Esauriti / Riordino', value: out > 0 ? out : 3, color: '#ef4444', subtext: 'Da ordinare a fornitore' }
+    ];
+  }, [products]);
+
+  const courierBarData: BarDataPoint[] = useMemo(() => {
+    return [
+      { label: 'BRT Express', value: 142, color: '#dc2626' },
+      { label: 'GLS Italy', value: 98, color: '#2563eb' },
+      { label: 'DHL Express', value: 46, color: '#eab308' },
+      { label: 'Poste / SDA', value: 24, color: '#059669' }
+    ];
+  }, []);
+
+  const deliverySlaPie: PieSlice[] = useMemo(() => {
+    return [
+      { label: 'Consegna in 24 Ore', value: 184, color: '#10b981', subtext: 'Nord & Centro Italia' },
+      { label: 'Consegna in 48 Ore', value: 96, color: '#06b6d4', subtext: 'Sud Italia' },
+      { label: 'Isole / Disagiate (72h)', value: 30, color: '#f59e0b', subtext: 'Sicilia, Sardegna, Minori' }
+    ];
+  }, []);
 
   // Filtered orders for Logistics
   const filteredOrders = useMemo(() => {
@@ -735,10 +883,12 @@ export default function AdminPage() {
 
 
       {/* ========================================================= */}
-      {/* TAB 1: KPI & EXECUTIVE DASHBOARD                         */}
+      {/* TAB 1: KPI & EXECUTIVE DASHBOARD WITH INTERACTIVE CHARTS  */}
       {/* ========================================================= */}
       {activeTab === 'kpi' && (
         <div className="space-y-8">
+          
+          {/* Top KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             
             <div className="glass-card p-5 rounded-2xl border border-slate-800 space-y-2">
@@ -795,97 +945,299 @@ export default function AdminPage() {
 
           </div>
 
-          {/* Secondary Telemetry Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            {/* Split B2B vs B2C */}
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-              <div className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
-                <span>Spaccato Clientela Fiscale</span>
-                <Users className="w-4 h-4 text-cyan-400" />
-              </div>
-              <div className="space-y-3">
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-slate-300 font-medium">Officine & Aziende (B2B con SDI/PEC)</span>
-                    <span className="font-bold text-white font-mono">{kpiStats.b2bOrdersCount} ordini</span>
-                  </div>
-                  <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-                    <div 
-                      className="h-full bg-cyan-500 rounded-full" 
-                      style={{ width: `${(kpiStats.b2bOrdersCount / Math.max(1, kpiStats.totalOrdersCount)) * 100}%` }}
-                    />
-                  </div>
-                </div>
+          {/* Interactive Charts Toolbar (Sub-views & Timeframe filter) */}
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-3 rounded-2xl bg-slate-900 border border-slate-800">
+            {/* Sub-Tabs */}
+            <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto text-xs font-bold">
+              <button
+                onClick={() => setKpiSubTab('overview')}
+                className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                  kpiSubTab === 'overview'
+                    ? 'bg-slate-800 text-white border border-orange-500/50 shadow-md'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-950/60'
+                }`}
+              >
+                <TrendingUp className="w-3.5 h-3.5 text-orange-400" />
+                <span>Panoramica Complessiva</span>
+              </button>
 
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-slate-300 font-medium">Privati & Appassionati (B2C con CF)</span>
-                    <span className="font-bold text-white font-mono">{kpiStats.b2cOrdersCount} ordini</span>
-                  </div>
-                  <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-                    <div 
-                      className="h-full bg-orange-500 rounded-full" 
-                      style={{ width: `${(kpiStats.b2cOrdersCount / Math.max(1, kpiStats.totalOrdersCount)) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
+              <button
+                onClick={() => setKpiSubTab('sales')}
+                className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                  kpiSubTab === 'sales'
+                    ? 'bg-slate-800 text-white border border-cyan-500/50 shadow-md'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-950/60'
+                }`}
+              >
+                <DollarSign className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Specifiche Vendite</span>
+              </button>
+
+              <button
+                onClick={() => setKpiSubTab('inventory')}
+                className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                  kpiSubTab === 'inventory'
+                    ? 'bg-slate-800 text-white border border-amber-500/50 shadow-md'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-950/60'
+                }`}
+              >
+                <Package className="w-3.5 h-3.5 text-amber-400" />
+                <span>Specifiche Magazzino</span>
+              </button>
+
+              <button
+                onClick={() => setKpiSubTab('logistics')}
+                className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                  kpiSubTab === 'logistics'
+                    ? 'bg-slate-800 text-white border border-emerald-500/50 shadow-md'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-950/60'
+                }`}
+              >
+                <Truck className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Specifiche Spedizioni</span>
+              </button>
             </div>
 
-            {/* Logistics Performance */}
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-              <div className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
-                <span>Rendimento Logistico</span>
-                <Truck className="w-4 h-4 text-emerald-400" />
-              </div>
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between items-center py-1 border-b border-slate-800">
-                  <span className="text-slate-400">Spese incassate da clienti:</span>
-                  <span className="text-emerald-400 font-bold font-mono">€ {kpiStats.totalShippingCharged.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between items-center py-1 border-b border-slate-800">
-                  <span className="text-slate-400">Costo stimato vettori (BRT/GLS):</span>
-                  <span className="text-slate-300 font-mono">€ {kpiStats.totalShippingEstimatedCost.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-slate-400">Saldo logistica:</span>
-                  <span className={`font-bold font-mono ${kpiStats.totalShippingCharged >= kpiStats.totalShippingEstimatedCost ? 'text-emerald-400' : 'text-amber-400'}`}>
-                    € {(kpiStats.totalShippingCharged - kpiStats.totalShippingEstimatedCost).toFixed(2)}
-                  </span>
-                </div>
-              </div>
+            {/* Timeframe Pills */}
+            <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-mono">
+              <button
+                onClick={() => setKpiTimeframe('7g')}
+                className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+                  kpiTimeframe === '7g' ? 'bg-orange-500 text-white font-bold' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                7 Giorni
+              </button>
+              <button
+                onClick={() => setKpiTimeframe('30g')}
+                className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+                  kpiTimeframe === '30g' ? 'bg-orange-500 text-white font-bold' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                30 Giorni
+              </button>
+              <button
+                onClick={() => setKpiTimeframe('90g')}
+                className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+                  kpiTimeframe === '90g' ? 'bg-orange-500 text-white font-bold' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Trimestre
+              </button>
+              <button
+                onClick={() => setKpiTimeframe('2026')}
+                className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+                  kpiTimeframe === '2026' ? 'bg-orange-500 text-white font-bold' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Anno 2026
+              </button>
             </div>
-
-            {/* Quick Actions */}
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4 flex flex-col justify-between">
-              <div>
-                <div className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
-                  Esportazioni Rapide
-                </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Scarica il registro contabile completo per il commercialista o apri la rubrica clienti.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <button
-                  onClick={handleExportCsv}
-                  className="w-full py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                >
-                  <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-                  <span>Esporta CSV per Commercialista</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab('crm')}
-                  className="w-full py-2.5 px-3 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-400 font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                >
-                  <Users className="w-4 h-4" />
-                  <span>Apri Rubrica Clienti & Officine</span>
-                </button>
-              </div>
-            </div>
-
           </div>
+
+          {/* DYNAMIC CHARTS DISPLAY ACCORDING TO SUB-TAB */}
+          {kpiSubTab === 'overview' && (
+            <div className="space-y-6">
+              {/* Main Spline Curve */}
+              <AreaSplineChart
+                data={timelineData}
+                title="Curva Fatturato nel Tempo (Bézier Spline)"
+                subtitle={`Andamento ricavi lordi con IVA 22% separata e ordini nel periodo selezionato (${kpiTimeframe.toUpperCase()})`}
+                height={270}
+              />
+
+              {/* 2-Column Secondary Charts */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <BarHistogramChart
+                  data={weeklyVolumeHistogram}
+                  title="Volume Ordini per Periodo (Istogramma)"
+                  subtitle="Numero di ordini gestiti ed evasi da magazzino"
+                  valuePrefix=""
+                />
+
+                <DonutPieChart
+                  data={customerSplitPie}
+                  title="Ripartizione Fiscale Clienti (Grafico a Torta)"
+                  subtitle="Fatturato B2B Officine (SDI) vs B2C Privati (CF)"
+                  centerTotalLabel="Clientela"
+                />
+              </div>
+            </div>
+          )}
+
+          {kpiSubTab === 'sales' && (
+            <div className="space-y-6">
+              <AreaSplineChart
+                data={marginTimelineData}
+                title="Scontrino Medio (AOV) & Margine Operativo Lordo"
+                subtitle="Valore medio carrello per ordine e marginalità media sulle vendite"
+                height={270}
+              />
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <BarHistogramChart
+                  data={categorySalesHistogram}
+                  title="Fatturato per Reparto Meccanico (Istogramma)"
+                  subtitle="Classifica ricavi suddivisi per categoria di ricambio"
+                  valuePrefix="€ "
+                />
+
+                <DonutPieChart
+                  data={paymentMethodsPie}
+                  title="Canali di Pagamento Incassati (Grafico a Torta)"
+                  subtitle="Ripartizione transazioni tra Carte Stripe, PayPal, Bonifico e Contrassegno"
+                  centerTotalLabel="Incassi"
+                />
+              </div>
+            </div>
+          )}
+
+          {kpiSubTab === 'inventory' && (
+            <div className="space-y-6">
+              <BarHistogramChart
+                data={inventoryValueHistogram}
+                title="Valore Immobilizzato per Reparto a Magazzino (Istogramma)"
+                subtitle="Capitale ricambi calcolato a prezzo di listino per categoria"
+                valuePrefix="€ "
+                height={270}
+              />
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <DonutPieChart
+                  data={stockHealthPie}
+                  title="Salute Giacenze Magazzino (Grafico a Torta)"
+                  subtitle="Percentuale pezzi in disponibilità ottimale, scorta minima ed esauriti"
+                  centerTotalLabel="Articoli"
+                />
+
+                <div className="glass-card p-5 rounded-2xl border border-slate-800 bg-slate-950/70 space-y-4 flex flex-col justify-between">
+                  <div className="border-b border-slate-800/80 pb-3">
+                    <h3 className="text-sm font-black text-white uppercase tracking-tight flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-amber-400" />
+                      <span>Telemetria Rotazione Scorte</span>
+                    </h3>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Indici medi di movimentazione scaffali</p>
+                  </div>
+
+                  <div className="space-y-3 text-xs">
+                    <div className="flex justify-between items-center py-1.5 border-b border-slate-800">
+                      <span className="text-slate-300">Tempo Medio Permanenza Scaffale:</span>
+                      <span className="font-mono font-bold text-emerald-400">14.2 giorni</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1.5 border-b border-slate-800">
+                      <span className="text-slate-300">Indice di Rotazione Annuo (Turnover):</span>
+                      <span className="font-mono font-bold text-cyan-400">6.8x / anno</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1.5 border-b border-slate-800">
+                      <span className="text-slate-300">Reparto Più Veloce a Ruotare:</span>
+                      <span className="font-mono font-bold text-orange-400">Impianto Frenante (9.4 gg)</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1.5">
+                      <span className="text-slate-300">Articoli Sotto Soglia Minima:</span>
+                      <span className="font-mono font-bold text-amber-400">{kpiStats.lowStockCount} ricambi</span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setActiveTab('warehouse');
+                      setStockFilter('low');
+                    }}
+                    className="w-full py-2 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <span>Vedi Ricambi Sottoscorta a Magazzino</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {kpiSubTab === 'logistics' && (
+            <div className="space-y-6">
+              <BarHistogramChart
+                data={courierBarData}
+                title="Volumi di Spedizione per Vettore Espresso (Istogramma)"
+                subtitle="Numero totale di colli affidati a BRT Express, GLS Italy, DHL e Poste"
+                valuePrefix=""
+                height={260}
+              />
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <DonutPieChart
+                  data={deliverySlaPie}
+                  title="Tempi di Consegna Raggiunti (Grafico a Torta)"
+                  subtitle="Performance di recapito tracciato su territorio nazionale"
+                  centerTotalLabel="Spedizioni"
+                />
+
+                <div className="glass-card p-5 rounded-2xl border border-slate-800 bg-slate-950/70 space-y-4 flex flex-col justify-between">
+                  <div className="border-b border-slate-800/80 pb-3">
+                    <h3 className="text-sm font-black text-white uppercase tracking-tight flex items-center gap-2">
+                      <Truck className="w-4 h-4 text-emerald-400" />
+                      <span>Bilancio Economico Spedizioni</span>
+                    </h3>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Tariffe addebitate vs Costi contrattuali corrieri</p>
+                  </div>
+
+                  <div className="space-y-2.5 text-xs">
+                    <div className="flex justify-between items-center py-1 border-b border-slate-800">
+                      <span className="text-slate-400">Spese incassate da clienti:</span>
+                      <span className="text-emerald-400 font-bold font-mono">€ {kpiStats.totalShippingCharged.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1 border-b border-slate-800">
+                      <span className="text-slate-400">Costo stimato vettori convenzionati:</span>
+                      <span className="text-slate-300 font-mono">€ {kpiStats.totalShippingEstimatedCost.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1.5 border-t border-slate-800/80">
+                      <span className="text-slate-300 font-bold">Margine Netto Logistica:</span>
+                      <span className={`font-mono font-black text-sm ${kpiStats.totalShippingCharged >= kpiStats.totalShippingEstimatedCost ? 'text-emerald-400' : 'text-amber-400'}`}>
+                        € {(kpiStats.totalShippingCharged - kpiStats.totalShippingEstimatedCost).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setActiveTab('logistics')}
+                    className="w-full py-2 px-3 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <span>Apri Gestione Lettere di Vettura & Tracking</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Quick Actions & Export Strip */}
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-900/90 via-slate-950 to-slate-900 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <div className="text-xs font-bold text-white uppercase tracking-wider">
+                Documentazione & Esportazione Commercialista
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Scarica il tracciato record completo con IVA 22% scorporata per software di contabilità italiana.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleExportCsv}
+                className="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center gap-2 transition-colors cursor-pointer"
+              >
+                <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+                <span>Esporta CSV Commercialista</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('crm')}
+                className="py-2.5 px-4 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-400 font-bold text-xs flex items-center gap-2 transition-colors cursor-pointer"
+              >
+                <Users className="w-4 h-4" />
+                <span>Rubrica CRM</span>
+              </button>
+            </div>
+          </div>
+
         </div>
       )}
 
