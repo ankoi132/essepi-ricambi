@@ -9,19 +9,20 @@ import {
   Car, 
   Wrench, 
   ShieldCheck, 
-  Zap, 
-  Sparkles, 
-  SlidersHorizontal, 
-  Activity, 
-  Radio, 
   Disc, 
   Cog, 
   Lightbulb, 
   Gauge, 
-  CheckCircle2, 
+  ChevronRight,
   ArrowRight,
-  Flame,
-  ChevronRight
+  SlidersHorizontal,
+  CheckCircle2,
+  FileText,
+  MessageSquare,
+  Sparkles,
+  Layers,
+  HelpCircle,
+  Hash
 } from 'lucide-react';
 import { VEHICLE_MAKES } from '@/lib/data';
 import { useStore } from '@/lib/store';
@@ -31,101 +32,101 @@ interface Hotspot {
   name: string;
   categorySlug: string;
   oemSample: string;
+  spec: string;
   top: string;
   left: string;
   icon: any;
-  color: string;
   desc: string;
+  inspectionTag: string;
 }
 
 const VEHICLE_HOTSPOTS: Hotspot[] = [
   {
     id: 'freni',
-    name: 'Impianto Frenante',
+    name: 'Dischi & Pastiglie OEM',
     categorySlug: 'freni',
     oemSample: '04466-0F010',
-    top: '68%',
-    left: '22%',
+    spec: 'Acciaio ad alto tenore di carbonio • Mescola GG',
+    top: '64%',
+    left: '23%',
     icon: Disc,
-    color: '#ff5e00',
-    desc: 'Dischi ventilati e pastiglie freno con mescola originale OEM anti-fischio.'
+    desc: 'Dischi autoventilanti rettificati e pastiglie freno con mescola originale OEM anti-fischio.',
+    inspectionTag: 'COLLAUDO TOLL. 0.015mm'
   },
   {
     id: 'distribuzione',
     name: 'Distribuzione & Cinghie',
     categorySlug: 'distribuzione',
     oemSample: '1372438-KIT',
-    top: '38%',
-    left: '32%',
+    spec: 'Profilo dente HTD • Cuscinetti stagni NTN',
+    top: '36%',
+    left: '34%',
     icon: Cog,
-    color: '#06b6d4',
-    desc: 'Kit catene e cinghie dentate con tenditori idraulici e pompe acqua.'
+    desc: 'Kit catene e cinghie dentate con tenditori idraulici a pressione calibrata e pompe acqua.',
+    inspectionTag: 'KIT COMPLETO CON TENDITORE'
   },
   {
     id: 'motore',
-    name: 'Gruppo Termico & Testata',
+    name: 'Testata & Termico',
     categorySlug: 'motore',
     oemSample: '71740678',
-    top: '42%',
-    left: '48%',
+    spec: 'Guarnizioni multistrato MLS • Acciaio per molle',
+    top: '40%',
+    left: '50%',
     icon: Gauge,
-    color: '#f59e0b',
-    desc: 'Guarnizioni testata rinforzate, punterie in elastomero FPM e sensori.'
+    desc: 'Guarnizioni testata rinforzate multistrato, punterie in elastomero FPM e sensori di pressione.',
+    inspectionTag: 'TENUTA 180 BAR CERTIFICATA'
   },
   {
     id: 'illuminazione',
-    name: 'Fanaleria & Proiettori',
+    name: 'Fanaleria New Old Stock',
     categorySlug: 'illuminazione',
     oemSample: '1J6945095Q',
-    top: '32%',
-    left: '78%',
+    spec: 'Policarbonato anti-ingiallimento UV • Imballo d\'epoca',
+    top: '30%',
+    left: '79%',
     icon: Lightbulb,
-    color: '#3b82f6',
-    desc: 'Gruppi ottici anteriori e fanali posteriori originali New Old Stock.'
+    desc: 'Gruppi ottici anteriori e fanali posteriori originali New Old Stock preservati in scatole d\'epoca.',
+    inspectionTag: 'NOS ORIGINALE D\'EPOCA'
   },
   {
     id: 'sospensioni',
-    name: 'Sospensioni & Mozzi',
+    name: 'Mozzi Ruota & Sospensioni',
     categorySlug: 'sospensioni',
     oemSample: '42410-F4010',
-    top: '72%',
+    spec: 'Acciaio temprato ad induzione • Magnete ABS 96 poli',
+    top: '68%',
     left: '74%',
     icon: ShieldCheck,
-    color: '#10b981',
-    desc: 'Cuscinetti ruota sigillati con sensore ABS magnetico integrato.'
+    desc: 'Cuscinetti ruota sigillati di 3ª generazione con ruota fonica e sensore ABS magnetico integrato.',
+    inspectionTag: 'RALLA SIGILLATA ESENTE MANUTENZIONE'
   }
 ];
 
 const DISPATCH_FEED = [
-  { item: 'Set Pastiglie Toyota Verso (04466-0F010)', dest: 'Bologna (BO)', courier: 'BRT Express', time: '2 min fa' },
-  { item: 'Kit Catena Ford Transit 2.4 (1372438)', dest: 'Modena (MO)', courier: 'GLS Italy', time: '8 min fa' },
-  { item: 'Fanale Posteriore Golf IV (1J6945095Q)', dest: 'Milano (MI)', courier: 'DHL Express', time: '14 min fa' },
-  { item: 'Cuscinetto Mozzo Toyota C-HR (42410-F4010)', dest: 'Roma (RM)', courier: 'BRT Express', time: '21 min fa' }
+  { item: 'Set Pastiglie Toyota Verso (OE 04466-0F010)', dest: 'Bologna (BO)', courier: 'BRT Express 24h', time: '12 min fa' },
+  { item: 'Kit Catena Morse Ford Transit 2.4 (OE 1372438)', dest: 'Vicenza (VI)', courier: 'GLS Italy', time: '28 min fa' },
+  { item: 'Fanale Posteriore NOS Golf IV (OE 1J6945095Q)', dest: 'Milano (MI)', courier: 'DHL Express', time: '41 min fa' },
+  { item: 'Mozzo Ruota ABS Toyota C-HR (OE 42410-F4010)', dest: 'Firenze (FI)', courier: 'BRT Express 24h', time: '1 ora fa' }
 ];
 
 export default function CinematicHero() {
   const router = useRouter();
   const { setActiveVehicle, setIsVehicleModalOpen } = useStore();
 
+  const [searchTab, setSearchTab] = useState<'vehicle' | 'oem' | 'libretto'>('vehicle');
   const [activeHotspot, setActiveHotspot] = useState<Hotspot>(VEHICLE_HOTSPOTS[0]);
   const [selectedMake, setSelectedMake] = useState('');
   const [selectedModel, setSelectedModel] = useState('');
   const [oemInput, setOemInput] = useState('');
-  const [engineStarted, setEngineStarted] = useState(false);
   const [dispatchIndex, setDispatchIndex] = useState(0);
 
-  // Auto-cycle through dispatch notifications
   useEffect(() => {
     const timer = setInterval(() => {
       setDispatchIndex(prev => (prev + 1) % DISPATCH_FEED.length);
     }, 4500);
     return () => clearInterval(timer);
   }, []);
-
-  const handleStartEngine = () => {
-    setEngineStarted(true);
-    setTimeout(() => setEngineStarted(false), 2400);
-  };
 
   const handleVehicleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,231 +144,297 @@ export default function CinematicHero() {
   };
 
   return (
-    <div className="relative overflow-hidden pt-8 pb-20 border-b border-slate-800/80">
+    <div className="relative pt-6 pb-20 border-b border-[#262c3a] bg-[#0d0f14] overflow-hidden">
       
-      {/* 1. CINEMATIC HEADLIGHT BEAMS */}
-      <div className="absolute top-0 left-1/4 -translate-x-1/2 w-[600px] h-[550px] headlight-cone pointer-events-none opacity-40 animate-pulse-slow" />
-      <div className="absolute top-0 right-1/4 translate-x-1/2 w-[600px] h-[550px] headlight-cone pointer-events-none opacity-40 animate-pulse-slow" style={{ animationDelay: '1.5s' }} />
-
-      {/* Subtle Carbon Grid Matrix */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-12">
+      {/* Background blueprint drafting grid texture */}
+      <div className="absolute inset-0 blueprint-grid pointer-events-none opacity-60" />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-10">
         
-        {/* Top Telemetry & Live Dispatch Stream */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-white/5 pb-4 text-xs font-mono">
-          
+        {/* Warehouse Registry & Live Dispatch Strip */}
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 border-b border-[#1e2330] pb-4 text-xs font-mono">
           <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 font-bold text-[11px]">
-              <Radio className="w-3.5 h-3.5 animate-pulse text-orange-400" />
-              <span>RADAR LOGISTICA ATTIVO</span>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#141720] border border-[#2b3244] text-[#ff5500] font-bold text-[11px] rounded">
+              <span className="w-2 h-2 rounded-full bg-[#ff5500] animate-pulse" />
+              <span>MODENA // ARCHIVIO RICAMBI</span>
             </span>
-            <span className="text-slate-400 hidden sm:inline">|</span>
-            <div className="overflow-hidden h-5 text-slate-300">
+            <span className="text-[#3b445a] hidden sm:inline">|</span>
+            <div className="overflow-hidden h-5 text-[#9aa4bc]">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={dispatchIndex}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.25 }}
                   className="flex items-center gap-2 truncate text-[11px]"
                 >
-                  <span className="text-emerald-400">⚡ In consegna:</span>
-                  <span className="text-white font-semibold">{DISPATCH_FEED[dispatchIndex].item}</span>
-                  <span className="text-slate-400">→ {DISPATCH_FEED[dispatchIndex].dest}</span>
-                  <span className="text-orange-400">({DISPATCH_FEED[dispatchIndex].time})</span>
+                  <span className="text-[#00e5a3]">Partito oggi:</span>
+                  <span className="text-[#f4efe6] font-medium">{DISPATCH_FEED[dispatchIndex].item}</span>
+                  <span className="text-[#64748b]">→ {DISPATCH_FEED[dispatchIndex].dest}</span>
+                  <span className="text-[#ff7830] font-mono text-[10px]">({DISPATCH_FEED[dispatchIndex].courier})</span>
                 </motion.div>
               </AnimatePresence>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-slate-400 text-[11px]">
-            <span className="flex items-center gap-1 text-emerald-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-              4.489 Ricambi a Banco
-            </span>
-            <span>•</span>
-            <span className="text-slate-300">Qualità Certificata 1° Impianto</span>
+          <div className="flex items-center gap-4 text-[#8a94a6] text-[11px]">
+            <span className="text-[#f4efe6] font-medium">4.489 Ricambi Fisici a Scaffale</span>
+            <span className="text-[#3b445a]">•</span>
+            <span className="text-[#00e5a3] font-medium">100% Feedback su 3.600+ Ordini</span>
           </div>
-
         </div>
 
-        {/* HERO TITLE & ENGINE REV BUTTON */}
-        <div className="text-center max-w-4xl mx-auto space-y-6">
-          
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-900/90 border border-orange-500/40 text-orange-400 text-xs font-bold shadow-xl shadow-orange-500/10"
-          >
-            <Flame className="w-4 h-4 text-orange-500" />
-            <span>OLTRE IL COMMERCIO SU EBAY: VETRINA UFFICIALE AD ALTA PRECISIONE</span>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight uppercase leading-none font-sans"
-          >
-            LA CENTRALE DEI <br />
-            <span className="bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(255,94,0,0.4)]">
-              RICAMBI ORIGINALI
-            </span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed"
-          >
-            Ricambi originali di primo impianto e New Old Stock (NOS) introvabili altrove. Verifica rapida del codice telaio, assistenza tecnica diretta e spedizione in 24/48h con corriere espresso tracciato.
-          </motion.p>
-
-          {/* Engine Ignition Action Button */}
-          <div className="flex items-center justify-center gap-3 pt-2">
-            <button
-              onClick={handleStartEngine}
-              className={`px-5 py-2.5 rounded-xl text-xs font-black tracking-wider uppercase flex items-center gap-2 transition-all duration-300 ${
-                engineStarted
-                  ? 'bg-orange-500 text-white shadow-[0_0_35px_rgba(255,94,0,0.8)] scale-105'
-                  : 'bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700/80 hover:border-orange-500/50'
-              }`}
-            >
-              <Zap className={`w-4 h-4 ${engineStarted ? 'text-white animate-spin' : 'text-orange-400'}`} />
-              <span>{engineStarted ? 'TELEMETRIA INNESTATA // 100% READY' : 'ACCENDI SCANNER VEICOLO'}</span>
-            </button>
+        {/* Hero Editorial Header */}
+        <div className="max-w-4xl space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#1a1d26] border border-[#2d3345] text-[#e5a93b] text-xs font-mono font-medium rounded">
+            <span>FONDI DI MAGAZZINO D'EPOCA & RICAMBI ORIGINALI OEM</span>
           </div>
 
+          <h1 className="text-4xl sm:text-6xl font-black text-[#f4efe6] tracking-tight leading-[1.08] font-sans">
+            I ricambi originali che non trovi più altrove.
+          </h1>
+
+          <p className="text-base sm:text-lg text-[#9aa4bc] max-w-2xl leading-relaxed">
+            Pezzi originali di primo impianto e New Old Stock (NOS) preservati in imballo d'epoca. Nessun algoritmo generico: verifichiamo la sigla motore e il telaio sul tuo libretto prima di spedire da Modena.
+          </p>
         </div>
 
-        {/* 2. THE CINEMATIC INTERACTIVE BLUEPRINT SCANNER (CENTER STAGE) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        {/* Main Terminal & Exploded Assembly Stage */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Left Cockpit: Automotive Car & OEM Search Terminal */}
+          {/* Left: Physical Parts Finder Terminal */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="glass-card rounded-3xl p-6 sm:p-7 border border-slate-700/80 shadow-2xl relative">
-              <div className="laser-scanner" />
+            <div className="bg-[#12151d] border border-[#222838] rounded-2xl p-5 sm:p-6 shadow-2xl relative">
               
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center">
-                    <Car className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                      Terminale Selezione Vettura
-                    </h3>
-                    <p className="text-[11px] text-slate-400">Match compatibilità 100% garantito</p>
-                  </div>
-                </div>
+              {/* Terminal Header Tabs */}
+              <div className="flex items-center gap-1.5 p-1 bg-[#090b10] rounded-xl border border-[#1b202c] mb-5">
                 <button
-                  onClick={() => setIsVehicleModalOpen(true)}
-                  className="text-[11px] text-orange-400 hover:text-orange-300 font-semibold flex items-center gap-1"
-                >
-                  <SlidersHorizontal className="w-3 h-3" />
-                  <span>Garage Completo</span>
-                </button>
-              </div>
-
-              {/* Vehicle selectors */}
-              <form onSubmit={handleVehicleSearch} className="space-y-3.5">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1">
-                    1. Marca Costruttrice
-                  </label>
-                  <select
-                    value={selectedMake}
-                    onChange={(e) => setSelectedMake(e.target.value)}
-                    className="w-full py-2.5 px-3 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-orange-500 font-semibold"
-                  >
-                    <option value="">Seleziona Marca Automobilistica...</option>
-                    {VEHICLE_MAKES.map(m => (
-                      <option key={m} value={m}>{m}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1">
-                    2. Modello o Serie
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="es. Golf IV, C-HR, Transit, Punto, Touran..."
-                    value={selectedModel}
-                    onChange={(e) => setSelectedModel(e.target.value)}
-                    className="w-full py-2.5 px-3 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={!selectedMake}
-                  className={`w-full py-3 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
-                    selectedMake
-                      ? 'bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 text-white shadow-xl shadow-orange-500/25 cursor-pointer hover:brightness-110'
-                      : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                  type="button"
+                  onClick={() => setSearchTab('vehicle')}
+                  className={`flex-1 py-2 px-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                    searchTab === 'vehicle'
+                      ? 'bg-[#1b202c] text-[#f4efe6] border border-[#2d3548] shadow-sm'
+                      : 'text-[#8a94a6] hover:text-[#f4efe6]'
                   }`}
                 >
-                  <Search className="w-4 h-4" />
-                  <span>Scansiona Ricambi per Questo Modello</span>
+                  <Car className="w-3.5 h-3.5 text-[#ff5500]" />
+                  <span>Per Vettura</span>
                 </button>
-              </form>
 
-              {/* Direct OEM Code Search */}
-              <div className="mt-5 pt-4 border-t border-slate-800 space-y-2">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="font-bold text-slate-400 uppercase">Hai il Codice OEM?</span>
-                  <span className="text-cyan-400 font-mono">Verifica Diretta</span>
-                </div>
-                <form onSubmit={handleOemSearch} className="relative">
-                  <input
-                    type="text"
-                    placeholder="Incolla codice OEM (es. 04466-0F010)"
-                    value={oemInput}
-                    onChange={(e) => setOemInput(e.target.value)}
-                    className="w-full pl-9 pr-20 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white font-mono placeholder:font-sans placeholder-slate-500 focus:outline-none focus:border-cyan-400"
-                  />
-                  <Wrench className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
-                  <button
-                    type="submit"
-                    className="absolute right-1 top-1 bottom-1 px-3 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs rounded-lg transition-colors"
-                  >
-                    Trova OEM
-                  </button>
-                </form>
+                <button
+                  type="button"
+                  onClick={() => setSearchTab('oem')}
+                  className={`flex-1 py-2 px-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                    searchTab === 'oem'
+                      ? 'bg-[#1b202c] text-[#f4efe6] border border-[#2d3548] shadow-sm'
+                      : 'text-[#8a94a6] hover:text-[#f4efe6]'
+                  }`}
+                >
+                  <Hash className="w-3.5 h-3.5 text-[#00b4d8]" />
+                  <span>Codice OE</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSearchTab('libretto')}
+                  className={`flex-1 py-2 px-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                    searchTab === 'libretto'
+                      ? 'bg-[#1b202c] text-[#f4efe6] border border-[#2d3548] shadow-sm'
+                      : 'text-[#8a94a6] hover:text-[#f4efe6]'
+                  }`}
+                >
+                  <FileText className="w-3.5 h-3.5 text-[#00e5a3]" />
+                  <span>Libretto</span>
+                </button>
               </div>
 
+              {/* Tab 1: Search by Vehicle */}
+              {searchTab === 'vehicle' && (
+                <form onSubmit={handleVehicleSearch} className="space-y-4">
+                  <div>
+                    <label className="block text-[11px] font-mono font-semibold text-[#8a94a6] uppercase tracking-wider mb-1.5">
+                      1. Costruttore Automobilistico
+                    </label>
+                    <select
+                      value={selectedMake}
+                      onChange={(e) => setSelectedMake(e.target.value)}
+                      className="w-full py-2.5 px-3 bg-[#090b10] border border-[#262c3a] rounded-xl text-xs text-[#f4efe6] focus:outline-none focus:border-[#ff5500] font-medium"
+                    >
+                      <option value="">Seleziona Costruttore (es. Toyota, Ford, Fiat...)</option>
+                      {VEHICLE_MAKES.map(m => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-[11px] font-mono font-semibold text-[#8a94a6] uppercase tracking-wider">
+                        2. Modello o Serie
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setIsVehicleModalOpen(true)}
+                        className="text-[11px] text-[#ff7830] hover:underline flex items-center gap-1"
+                      >
+                        <SlidersHorizontal className="w-3 h-3" />
+                        <span>Filtro Completo</span>
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="es. Golf IV, C-HR, Transit 2.4, Punto 188..."
+                      value={selectedModel}
+                      onChange={(e) => setSelectedModel(e.target.value)}
+                      className="w-full py-2.5 px-3 bg-[#090b10] border border-[#262c3a] rounded-xl text-xs text-[#f4efe6] placeholder-[#555f75] focus:outline-none focus:border-[#ff5500]"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={!selectedMake}
+                    className={`w-full py-3 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
+                      selectedMake
+                        ? 'bg-[#ff5500] hover:bg-[#e64a19] text-white shadow-lg shadow-[#ff5500]/20 cursor-pointer'
+                        : 'bg-[#1b202c] text-[#555f75] cursor-not-allowed border border-[#262c3a]'
+                    }`}
+                  >
+                    <Search className="w-4 h-4" />
+                    <span>Consulta Ricambi Compatibili</span>
+                  </button>
+
+                  <div className="pt-2 flex items-center justify-between text-[11px] text-[#64748b] font-mono border-t border-[#1e2330]">
+                    <span>Catalogati per telaio & motore</span>
+                    <span className="text-[#00e5a3]">Verifica rapida</span>
+                  </div>
+                </form>
+              )}
+
+              {/* Tab 2: Direct OEM Code Search */}
+              {searchTab === 'oem' && (
+                <form onSubmit={handleOemSearch} className="space-y-4">
+                  <div>
+                    <label className="block text-[11px] font-mono font-semibold text-[#8a94a6] uppercase tracking-wider mb-1.5">
+                      Codice Ricambio OE / OES / Casting
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Incolla codice (es. 04466-0F010, 1J6945095Q...)"
+                        value={oemInput}
+                        onChange={(e) => setOemInput(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2.5 bg-[#090b10] border border-[#262c3a] rounded-xl text-xs text-[#f4efe6] font-mono placeholder:font-sans placeholder-[#555f75] focus:outline-none focus:border-[#00b4d8]"
+                      />
+                      <Wrench className="w-3.5 h-3.5 text-[#555f75] absolute left-3 top-3" />
+                    </div>
+                    <p className="text-[11px] text-[#64748b] mt-1.5 leading-relaxed">
+                      Cerca per codice costruttore originale, codice stampato sul pezzo o cross-reference aftermarket.
+                    </p>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={!oemInput.trim()}
+                    className={`w-full py-3 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
+                      oemInput.trim()
+                        ? 'bg-[#00b4d8] hover:bg-[#0096c7] text-[#090b10] font-black shadow-lg shadow-[#00b4d8]/20 cursor-pointer'
+                        : 'bg-[#1b202c] text-[#555f75] cursor-not-allowed border border-[#262c3a]'
+                    }`}
+                  >
+                    <Search className="w-4 h-4" />
+                    <span>Verifica Codice a Magazzino</span>
+                  </button>
+
+                  <div className="pt-2 flex items-center justify-between text-[11px] text-[#64748b] font-mono border-t border-[#1e2330]">
+                    <span>Corrispondenza esatta 1° impianto</span>
+                    <span className="text-[#00b4d8]">Cross-matching attivo</span>
+                  </div>
+                </form>
+              )}
+
+              {/* Tab 3: Libretto Check via WhatsApp */}
+              {searchTab === 'libretto' && (
+                <div className="space-y-4">
+                  <div className="p-3.5 bg-[#0d1512] border border-[#16382a] rounded-xl space-y-2">
+                    <div className="flex items-center gap-2 text-[#00e5a3] text-xs font-bold">
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Verifica Immediata da Libretto</span>
+                    </div>
+                    <p className="text-xs text-[#9aa4bc] leading-relaxed">
+                      Non rischiare di ordinare il ricambio sbagliato. Inviaci una foto della pagina 2 del libretto di circolazione: verifichiamo la sigla motore <strong>(P.5)</strong> e il telaio <strong>(E)</strong> sui cataloghi ufficiali.
+                    </p>
+                  </div>
+
+                  <a
+                    href="https://wa.me/393461811152?text=Salve%20Essepi%20Ricambi,%20allego%20foto%20del%20libretto%20per%20la%20verifica%20di%20un%20ricambio."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3 px-4 rounded-xl bg-[#00e5a3] hover:bg-[#00c98f] text-[#090b10] font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-[#00e5a3]/20 transition-all cursor-pointer"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Invia Foto Libretto su WhatsApp (+39 346 181 1152)</span>
+                  </a>
+
+                  <div className="pt-2 flex items-center justify-between text-[11px] text-[#64748b] font-mono border-t border-[#1e2330]">
+                    <span>Tempo medio di risposta: 5 minuti</span>
+                    <span className="text-[#00e5a3]">Ricambista in linea</span>
+                  </div>
+                </div>
+              )}
+
+            </div>
+
+            {/* Direct Assurance Footnote */}
+            <div className="p-3.5 bg-[#12151d] border border-[#1e2330] rounded-xl flex items-center gap-3 text-xs text-[#9aa4bc]">
+              <div className="w-7 h-7 rounded-lg bg-[#ff5500]/10 border border-[#ff5500]/25 text-[#ff5500] flex items-center justify-center flex-shrink-0">
+                <ShieldCheck className="w-4 h-4" />
+              </div>
+              <p className="leading-snug">
+                <strong>Spedizioni assicurate in 24/48h:</strong> Imballo rinforzato a doppio strato e fattura con IVA esposta per detrazione officine.
+              </p>
             </div>
           </div>
 
-          {/* Right Blueprint: Interactive Exploded Chassis / Component Scanner */}
+          {/* Right: Technical Exploded Assembly & Inspection Schematic */}
           <div className="lg:col-span-7">
-            <div className="glass-card rounded-3xl p-6 sm:p-8 border border-slate-700/80 relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+            <div className="bg-[#12151d] border border-[#222838] rounded-2xl p-5 sm:p-6 shadow-2xl relative overflow-hidden">
               
-              {/* Technical Blueprint Grid Accents */}
-              <div className="absolute top-4 right-4 flex items-center gap-2 font-mono text-[10px] text-cyan-400/80">
-                <Activity className="w-3.5 h-3.5 animate-pulse" />
-                <span>CHASSIS TELEMETRY // ESSEPI-RICAMBI-HUD</span>
+              {/* Drafting Header Bar */}
+              <div className="flex items-center justify-between border-b border-[#1e2330] pb-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-mono font-bold text-[#f4efe6] tracking-wider uppercase">
+                    SPACCATO TECNICO D'OFFICINA // ESSEPI CATALOG 2026
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-[10px] font-mono text-[#8a94a6]">
+                  <span>SCALE: 1:1</span>
+                  <span>•</span>
+                  <span className="text-[#00b4d8]">ISO 9001 TOL.</span>
+                </div>
               </div>
 
-              {/* Interactive Vehicle Diagram Stage */}
-              <div className="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-950/90 border border-slate-800/80 flex items-center justify-center p-4">
+              {/* Exploded Canvas Stage */}
+              <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden bg-[#090b10] border border-[#1b202c] p-4 flex items-center justify-center">
                 
-                {/* Visual Blueprint Background Image */}
+                {/* Millimeter drafting grid background */}
+                <div className="absolute inset-0 blueprint-grid opacity-80 pointer-events-none" />
+
+                {/* Technical crosshairs and coordinate marks */}
+                <div className="absolute top-3 left-3 font-mono text-[9px] text-[#4a5568]">SEC-A // 001</div>
+                <div className="absolute bottom-3 right-3 font-mono text-[9px] text-[#4a5568]">REF: ISO-2768-m</div>
+                <div className="absolute top-3 right-3 font-mono text-[9px] text-[#4a5568]">+</div>
+                <div className="absolute bottom-3 left-3 font-mono text-[9px] text-[#4a5568]">+</div>
+
+                {/* Exploded Automotive Graphic Illustration */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=1200&auto=format&fit=crop&q=80"
-                  alt="Automotive Blueprint Telemetry"
-                  className="absolute inset-0 w-full h-full object-cover opacity-25 filter contrast-125"
+                  alt="Esploso Meccanico Essepi Ricambi"
+                  className="absolute inset-0 w-full h-full object-cover opacity-20 filter contrast-125 grayscale"
                 />
-                
-                {/* Futuristic Laser Matrix Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/80 pointer-events-none" />
 
-                {/* Hotspots over the diagram */}
+                {/* Interactive Inspection Callouts */}
                 {VEHICLE_HOTSPOTS.map((spot) => {
                   const isActive = activeHotspot.id === spot.id;
                   const Icon = spot.icon;
@@ -380,47 +447,38 @@ export default function CinematicHero() {
                       onMouseEnter={() => setActiveHotspot(spot)}
                     >
                       <div className="relative flex items-center justify-center group">
-                        {/* Ripple animation on active */}
-                        <div
-                          className="w-10 h-10 rounded-full absolute animate-ping opacity-40"
-                          style={{ backgroundColor: spot.color }}
-                        />
+                        {/* Callout Indicator Pin */}
                         <button
-                          className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all duration-300 shadow-xl ${
+                          type="button"
+                          className={`w-8 h-8 rounded-full flex items-center justify-center font-mono text-xs font-bold transition-all duration-200 border ${
                             isActive
-                              ? 'scale-125 border-white text-white'
-                              : 'bg-slate-900/90 border-slate-600 text-slate-300 group-hover:scale-110'
+                              ? 'bg-[#ff5500] text-white border-white scale-110 shadow-lg shadow-[#ff5500]/40'
+                              : 'bg-[#141720] text-[#cbd5e1] border-[#3b445a] hover:border-[#ff5500] hover:text-[#f4efe6]'
                           }`}
-                          style={{
-                            backgroundColor: isActive ? spot.color : undefined,
-                            boxShadow: isActive ? `0 0 25px ${spot.color}` : undefined
-                          }}
+                          title={spot.name}
                         >
-                          <Icon className="w-4 h-4" />
+                          <Icon className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
                   );
                 })}
 
-                {/* Live Hotspot Telemetry Card at Bottom of Diagram */}
-                <div className="absolute bottom-4 left-4 right-4 z-30">
-                  <div className="glass-panel p-4 rounded-2xl border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-950/90">
+                {/* Active Component Inspection Dossier */}
+                <div className="absolute bottom-3 left-3 right-3 z-30">
+                  <div className="bg-[#12151d]/95 backdrop-blur-md p-3.5 rounded-xl border border-[#2b3244] shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center text-white flex-shrink-0 shadow-lg"
-                        style={{ backgroundColor: activeHotspot.color }}
-                      >
-                        <activeHotspot.icon className="w-5 h-5" />
+                      <div className="w-9 h-9 rounded-lg bg-[#ff5500]/15 border border-[#ff5500]/30 text-[#ff5500] flex items-center justify-center flex-shrink-0">
+                        <activeHotspot.icon className="w-4 h-4" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold text-white">{activeHotspot.name}</span>
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-orange-400 border border-slate-700">
-                            Esempio OEM: {activeHotspot.oemSample}
+                          <span className="text-xs font-bold text-[#f4efe6]">{activeHotspot.name}</span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#1e2330] text-[#ff7830] border border-[#2d3548]">
+                            OE {activeHotspot.oemSample}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-400 mt-0.5 max-w-md">
+                        <p className="text-[11px] text-[#8a94a6] mt-0.5 max-w-md">
                           {activeHotspot.desc}
                         </p>
                       </div>
@@ -428,14 +486,23 @@ export default function CinematicHero() {
 
                     <Link
                       href={`/catalogo?categoria=${activeHotspot.categorySlug}`}
-                      className="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs flex items-center gap-1.5 whitespace-nowrap shadow-md shadow-orange-500/20 transition-all flex-shrink-0"
+                      className="px-3 py-1.5 rounded-lg bg-[#ff5500] hover:bg-[#e64a19] text-white font-bold text-xs flex items-center gap-1 whitespace-nowrap shadow-sm transition-all flex-shrink-0"
                     >
-                      <span>Vedi Ricambi</span>
+                      <span>Vedi Reparto</span>
                       <ChevronRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>
                 </div>
 
+              </div>
+
+              {/* Exploded Part Legend & Inspection Specs */}
+              <div className="mt-4 pt-3 border-t border-[#1e2330] flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-[#8a94a6]">
+                <div className="flex items-center gap-2">
+                  <span className="text-[#e5a93b]">SCHEDA ISPEZIONE:</span>
+                  <span className="text-[#f4efe6]">{activeHotspot.spec}</span>
+                </div>
+                <span className="text-[#00e5a3] font-semibold">{activeHotspot.inspectionTag}</span>
               </div>
 
             </div>

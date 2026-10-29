@@ -1,14 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #07090e;
-  --foreground: #f8fafc;
-  --card-bg: rgba(15, 20, 31, 0.75);
+  --background: #0d0f14;
+  --foreground: #f2f4f8;
+  --card-bg: #14171f;
   --card-border: rgba(255, 255, 255, 0.08);
-  --accent-orange: #ff5e00;
-  --accent-amber: #f59e0b;
-  --accent-cyan: #06b6d4;
+  --accent-vermilion: #e64a19;
+  --accent-orange: #ff5500;
+  --accent-amber: #e5a93b;
+  --accent-steel: #8c96a5;
+  --accent-blueprint: #2563eb;
   --accent-emerald: #10b981;
+  --paper-chalk: #f4efe6;
 }
 
 body {
@@ -16,181 +19,139 @@ body {
   color: var(--foreground);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   overflow-x: hidden;
+  /* Authentic Engineering Blueprint / Drafting Grid Texture */
   background-image: 
-    radial-gradient(circle at 50% -10%, rgba(255, 94, 0, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 100% 40%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 0% 70%, rgba(255, 94, 0, 0.08) 0%, transparent 40%),
-    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 100% 100%, 36px 36px, 36px 36px;
-  background-position: 0 0, 0 0, 0 0, -1px -1px, -1px -1px;
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    radial-gradient(ellipse at 50% 0%, rgba(255, 85, 0, 0.06) 0%, transparent 60%);
+  background-size: 32px 32px, 32px 32px, 100% 100%;
+  background-position: -1px -1px, -1px -1px, 0 0;
 }
 
-/* Carbon Fiber Texture */
-.carbon-pattern {
-  background: 
-    linear-gradient(27deg, #121620 5px, transparent 5px) 0 5px,
-    linear-gradient(207deg, #121620 5px, transparent 5px) 10px 0px,
-    linear-gradient(27deg, #1a202c 5px, transparent 5px) 0px 10px,
-    linear-gradient(207deg, #1a202c 5px, transparent 5px) 10px 5px,
-    linear-gradient(90deg, #0e121a 10px, #0b0e14 10px);
-  background-size: 20px 20px;
-}
-
-/* Cinematic Glassmorphism Classes */
-.glass-panel {
-  background: rgba(13, 18, 30, 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-}
-
-.glass-card {
-  background: linear-gradient(145deg, rgba(23, 32, 51, 0.65) 0%, rgba(11, 15, 25, 0.85) 100%);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+/* Mechanical Drafting Panel */
+.drafting-panel {
+  background: #13161e;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
-  overflow: hidden;
 }
 
-.glass-card:hover {
-  border-color: rgba(255, 94, 0, 0.45);
-  box-shadow: 0 15px 35px -10px rgba(255, 94, 0, 0.2), 0 0 25px -5px rgba(255, 94, 0, 0.15);
-  transform: translateY(-3px) scale(1.01);
-}
-
-.glass-card-cyan:hover {
-  border-color: rgba(6, 182, 212, 0.5);
-  box-shadow: 0 15px 35px -10px rgba(6, 182, 212, 0.25), 0 0 25px -5px rgba(6, 182, 212, 0.2);
-  transform: translateY(-3px) scale(1.01);
-}
-
-/* Headlight Beams & Glows */
-.glow-orange {
-  box-shadow: 0 0 35px -5px rgba(255, 94, 0, 0.5);
-}
-
-.glow-cyan {
-  box-shadow: 0 0 35px -5px rgba(6, 182, 212, 0.45);
-}
-
-.headlight-cone {
-  background: conic-gradient(from 180deg at 50% 0%, transparent 60deg, rgba(255, 140, 0, 0.18) 90deg, rgba(255, 255, 255, 0.35) 180deg, rgba(255, 140, 0, 0.18) 270deg, transparent 300deg);
-  filter: blur(28px);
-}
-
-/* Laser Scanner Animation */
-@keyframes laserScan {
-  0% {
-    top: 0%;
-    opacity: 0;
-  }
-  15% {
-    opacity: 1;
-  }
-  85% {
-    opacity: 1;
-  }
-  100% {
-    top: 100%;
-    opacity: 0;
-  }
-}
-
-.laser-scanner {
+.drafting-panel::before {
+  content: '+';
   position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #ff5e00, #ffb703, #ff5e00, transparent);
-  box-shadow: 0 0 15px 2px #ff5e00, 0 0 30px 4px rgba(255, 94, 0, 0.5);
-  animation: laserScan 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  top: 4px;
+  left: 6px;
+  font-family: monospace;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.2);
   pointer-events: none;
-  z-index: 20;
 }
 
-/* Telemetry HUD Borders */
-.hud-corner {
+.drafting-panel::after {
+  content: '+';
+  position: absolute;
+  bottom: 4px;
+  right: 6px;
+  font-family: monospace;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+}
+
+/* Warehouse Card */
+.workshop-card {
+  background: #14171f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
 }
-.hud-corner::before,
-.hud-corner::after {
+
+.workshop-card:hover {
+  border-color: rgba(255, 85, 0, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 85, 0, 0.2);
+}
+
+/* Authentic Workshop Stamp Seal */
+.workshop-stamp {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1.5px solid;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-weight: 700;
+  font-size: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stamp-nos {
+  border-color: #e5a93b;
+  color: #f6c065;
+  background: rgba(229, 169, 59, 0.1);
+}
+
+.stamp-oe {
+  border-color: #10b981;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.stamp-aftermarket {
+  border-color: #38bdf8;
+  color: #7dd3fc;
+  background: rgba(56, 189, 248, 0.1);
+}
+
+/* Technical Drafting Crosshair */
+.tech-crosshair {
+  position: relative;
+}
+.tech-crosshair::before,
+.tech-crosshair::after {
   content: '';
   position: absolute;
-  width: 8px;
-  height: 8px;
-  border-color: #ff5e00;
+  background: rgba(255, 255, 255, 0.15);
   pointer-events: none;
 }
-.hud-corner::before {
-  top: -1px;
-  left: -1px;
-  border-top: 2px solid #ff5e00;
-  border-left: 2px solid #ff5e00;
+.tech-crosshair::before {
+  top: 50%;
+  left: -6px;
+  right: -6px;
+  height: 1px;
 }
-.hud-corner::after {
-  bottom: -1px;
-  right: -1px;
-  border-bottom: 2px solid #ff5e00;
-  border-right: 2px solid #ff5e00;
+.tech-crosshair::after {
+  left: 50%;
+  top: -6px;
+  bottom: -6px;
+  width: 1px;
+}
+
+/* Blueprint Ruler Line */
+.blueprint-ruler {
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.1) 0,
+    rgba(255, 255, 255, 0.1) 1px,
+    transparent 1px,
+    transparent 12px
+  );
+  height: 6px;
 }
 
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #07090e;
+  background: #0d0f14;
 }
 ::-webkit-scrollbar-thumb {
-  background: #252e42;
-  border-radius: 4px;
+  background: #232733;
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #ff5e00;
-}
-
-/* Tachometer / Engine Rev Animation */
-@keyframes revPulse {
-  0%, 100% { transform: scale(1); filter: brightness(1); }
-  50% { transform: scale(1.02); filter: brightness(1.25); }
-}
-
-.engine-rev {
-  animation: revPulse 2s ease-in-out infinite;
-}
-
-/* Floating animation */
-@keyframes floatSlow {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-8px) rotate(0.5deg); }
-}
-
-.animate-float {
-  animation: floatSlow 5s ease-in-out infinite;
-}
-
-/* Electric Border Beam */
-@keyframes borderBeam {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.border-beam-container {
-  position: relative;
-  overflow: hidden;
-}
-.border-beam-container::before {
-  content: '';
-  position: absolute;
-  width: 150%;
-  height: 150%;
-  top: -25%;
-  left: -25%;
-  background: conic-gradient(from 0deg, transparent 70%, #ff5e00 85%, #06b6d4 95%, transparent 100%);
-  animation: borderBeam 4s linear infinite;
-  z-index: 0;
+  background: #363c4e;
 }
